@@ -74,6 +74,10 @@ body {
 }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
+/* 관리자 탭: 학생에겐 숨기고 로그인 후에만 노출 (§1-4) */
+.tab.admin-only { display: none; }
+body.admin-on .tab.admin-only { display: block; }
+
 /* ===================== 콘텐츠 ===================== */
 .content { flex: 1; padding: 16px; }
 .view { display: none; animation: fade .25s ease; }
@@ -266,6 +270,14 @@ input:focus { outline: none; border-color: var(--primary); }
   text-align: center; font-size: 12px; color: var(--muted);
   padding: 18px; padding-bottom: calc(18px + env(safe-area-inset-bottom));
 }
+/* 관리자 진입 링크: 학생이 신경 안 쓰도록 의도적으로 절제 */
+.admin-entry {
+  display: inline-block; margin-top: 10px;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 12px; text-decoration: underline;
+  padding: 6px 10px;
+}
+body.admin-on .admin-entry { display: none; }  /* 로그인 후엔 감춤 (로그아웃은 관리자 바에서) */
 
 /* ===================== 반응형 ===================== */
 @media (max-width: 480px) {

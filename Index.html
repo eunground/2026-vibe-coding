@@ -22,9 +22,9 @@
     <!-- 탭 네비게이션 -->
     <nav class="tabs" id="tabs">
       <button class="tab active" data-tab="scan">🔍 우산 스캔</button>
-      <button class="tab" data-tab="status">📋 대여 현황</button>
-      <button class="tab" data-tab="manage">☂️ 우산 관리</button>
-      <button class="tab" data-tab="history">🕓 대여 기록</button>
+      <button class="tab admin-only" data-tab="status">📋 대여 현황</button>
+      <button class="tab admin-only" data-tab="manage">☂️ 우산 관리</button>
+      <button class="tab admin-only" data-tab="history">🕓 대여 기록</button>
     </nav>
 
     <main class="content">
@@ -55,6 +55,7 @@
             <button class="btn btn-primary" id="loginBtn">로그인</button>
           </div>
           <div id="loginMsg" class="inline-msg"></div>
+          <button class="btn-text" id="loginCancel">← 학생 화면으로 돌아가기</button>
         </div>
       </section>
 
@@ -132,7 +133,10 @@
 
     </main>
 
-    <footer class="app-footer">☔ 우산 대여 시스템 · 24시간 이상 미반납 시 연체 처리</footer>
+    <footer class="app-footer">
+      ☔ 우산 대여 시스템 · 24시간 이상 미반납 시 연체 처리<br>
+      <button class="admin-entry" id="adminEntry">관리자 로그인</button>
+    </footer>
   </div>
 
   <!-- 로딩 오버레이 -->
