@@ -4,414 +4,903 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>학교 우산 대여</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,900&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-/* ===================== 기본 / 변수 ===================== */
 :root {
-  --primary: #1a73e8;
-  --primary-dark: #1557b0;
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --border: #e5e7eb;
+  --cream:    #f4ecd8;
+  --cream-2:  #ead8b3;
+  --navy:     #0d1a3c;
+  --navy-2:   #050a1f;
+  --yellow:   #ffd84d;
+  --magenta:  #ff4d8d;
+  --mint:     #88e0c4;
+  --paper:    rgba(13, 26, 60, 0.08);
 
-  --avail: #16a34a;       --avail-bg: #dcfce7;
-  --rented: #ea8600;      --rented-bg: #fef3c7;
-  --overdue: #dc2626;     --overdue-bg: #fee2e2;
-
-  --radius: 14px;
-  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+  --serif: 'Fraunces', 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+  --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+           "Malgun Gothic", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic",
-               "Apple SD Gothic Neo", Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.5;
+html, body {
+  background: var(--cream);
+  color: var(--navy);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
 }
 
+/* ===== 흩어진 데코 도형 (collage / cutout) ===== */
+.decor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+}
+.decor-circle-yellow {
+  top: -60px; right: -70px;
+  width: 240px; height: 240px;
+  background: var(--yellow);
+  border-radius: 50%;
+}
+.decor-triangle-magenta {
+  top: 32%; left: -50px;
+  width: 0; height: 0;
+  border-left: 70px solid transparent;
+  border-right: 70px solid transparent;
+  border-bottom: 130px solid var(--magenta);
+  transform: rotate(-22deg);
+  opacity: 0.95;
+}
+.decor-blob-mint {
+  bottom: 12%; right: -40px;
+  width: 180px; height: 180px;
+  background: var(--mint);
+  border-radius: 60% 40% 50% 60% / 50% 60% 40% 50%;
+  transform: rotate(18deg);
+}
+.decor-stripe {
+  position: fixed;
+  top: 22%; right: 5%;
+  width: 8px; height: 130px;
+  background: var(--navy);
+  transform: rotate(25deg);
+  z-index: 2;
+}
+.decor-dot-grid {
+  position: fixed;
+  bottom: 6%; left: 4%;
+  width: 110px; height: 78px;
+  background-image: radial-gradient(var(--navy) 2px, transparent 2.5px);
+  background-size: 14px 14px;
+  z-index: 2;
+  opacity: 0.7;
+}
+.decor-star {
+  position: fixed;
+  top: 50%; right: 7%;
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 90px;
+  color: var(--magenta);
+  transform: rotate(12deg);
+  z-index: 2;
+  line-height: 1;
+}
+
+/* ===== 레이아웃 ===== */
 .app {
-  max-width: 760px;
+  position: relative;
+  z-index: 10;
+  max-width: 620px;
   margin: 0 auto;
   min-height: 100vh;
+  padding: 28px 22px;
   display: flex;
   flex-direction: column;
 }
+.content { flex: 1; }
 
-/* ===================== 헤더 ===================== */
-.app-header {
-  background: linear-gradient(135deg, var(--primary), #4f46e5);
-  color: #fff;
-  padding: 22px 18px;
-  padding-top: calc(22px + env(safe-area-inset-top));
-}
-.brand { display: flex; align-items: center; gap: 14px; }
-.brand-logo { font-size: 38px; line-height: 1; }
-.brand-text h1 { font-size: 21px; font-weight: 700; }
-.brand-text p { font-size: 13px; opacity: .9; margin-top: 2px; }
-
-/* ===================== 탭 ===================== */
-.tabs {
-  display: flex;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 20;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tab {
-  flex: 1 0 auto;
-  padding: 14px 12px;
-  border: none;
-  background: none;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  white-space: nowrap;
-  border-bottom: 3px solid transparent;
-  transition: color .15s, border-color .15s;
-}
-.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-.tab.admin-only { display: none; }
-body.admin-on .tab.admin-only { display: block; }
-
-/* ===================== 콘텐츠 ===================== */
-.content { flex: 1; padding: 16px; }
-.view { display: none; animation: fade .25s ease; }
+.view { display: none; animation: fadeIn 0.4s ease; }
 .view.active { display: block; }
-@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
 
-/* ===================== 카드 ===================== */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
+/* ===== 시작 페이지 (HERO) ===== */
+.brand-eyebrow {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  margin-bottom: 28px;
+  color: var(--navy);
+}
+.brand-eyebrow .dot {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--magenta); border-radius: 50%;
+  vertical-align: middle; margin: 0 8px 3px;
+}
+
+.hero-title {
+  font-size: clamp(64px, 16vw, 140px);
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  margin-bottom: 8px;
+}
+.hero-title .serif    { font-family: var(--serif); }
+.hero-title .sans     { font-family: var(--sans); }
+.hero-title .italic   { font-style: italic; font-family: var(--serif); }
+.hero-title .underline {
+  background-image: linear-gradient(transparent 75%, var(--yellow) 75%);
+  background-size: 100% 100%;
+  padding: 0 4px;
+}
+.hero-title .row { display: block; }
+
+.hero-shape-inline {
+  display: inline-block;
+  width: 0.7em; height: 0.7em;
+  background: var(--mint);
+  border-radius: 50%;
+  vertical-align: -0.1em;
+  margin: 0 0.08em;
+  border: 4px solid var(--navy);
+}
+
+.hero-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 4.8vw, 28px);
+  font-weight: 400;
+  margin-top: 28px;
+  margin-bottom: 56px;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+.hero-sub .accent {
+  background: var(--magenta);
+  color: var(--cream);
+  padding: 0 8px;
+  font-style: normal;
+  font-weight: 700;
+  font-family: var(--sans);
+  font-size: 0.85em;
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+
+.start-actions { margin-top: 32px; }
+
+/* ===== CTA 버튼 (paper-cut feel, 굵은 보더 + 오프셋 그림자) ===== */
+.btn-cta {
+  display: inline-block;
+  padding: 18px 32px;
+  font-size: 17px;
+  font-weight: 800;
+  font-family: var(--sans);
+  letter-spacing: -0.01em;
+  border: 3px solid var(--navy);
+  border-radius: 0;
+  background: var(--cream);
+  color: var(--navy);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 6px 6px 0 var(--navy);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  text-decoration: none;
+}
+.btn-cta:hover  { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--navy); }
+.btn-cta:active { transform: translate(2px, 2px);   box-shadow: 2px 2px 0 var(--navy); }
+.btn-cta:disabled { opacity: 0.5; cursor: default; }
+
+.btn-cta-yellow  { background: var(--yellow); }
+.btn-cta-magenta { background: var(--magenta); color: var(--cream); }
+.btn-cta-mint    { background: var(--mint); }
+.btn-cta-navy    { background: var(--navy); color: var(--cream); box-shadow: 6px 6px 0 var(--magenta); }
+.btn-cta-navy:hover  { box-shadow: 8px 8px 0 var(--magenta); }
+.btn-cta-navy:active { box-shadow: 2px 2px 0 var(--magenta); }
+
+.btn-block { display: block; width: 100%; text-align: center; }
+
+.btn-back {
+  margin-top: 28px;
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--navy);
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 6px 2px;
+}
+.btn-back:hover { opacity: 1; }
+
+/* ===== 섹션 헤더 (서비스 선택 / 폼 화면) ===== */
+.section-eyebrow {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  margin: 12px 0 16px;
+  opacity: 0.6;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(44px, 11vw, 78px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+.section-title .italic { font-style: italic; }
+.section-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 19px;
+  margin-bottom: 36px;
+  opacity: 0.75;
+}
+
+/* ===== 서비스 선택 타일 ===== */
+.tile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.tile {
+  border: 3px solid var(--navy);
+  border-radius: 0;
+  padding: 28px 20px 24px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  box-shadow: 7px 7px 0 var(--navy);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.tile:hover  { transform: translate(-3px, -3px); box-shadow: 10px 10px 0 var(--navy); }
+.tile:active { transform: translate(2px, 2px);   box-shadow: 3px 3px 0 var(--navy); }
+.tile-rent   { background: var(--magenta); color: var(--cream); }
+.tile-return { background: var(--mint); color: var(--navy); }
+
+.tile-icon {
+  font-size: 44px;
+  line-height: 1;
   margin-bottom: 16px;
 }
-.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.card-title { font-size: 17px; font-weight: 700; }
-.card-desc { font-size: 13.5px; color: var(--muted); margin: 6px 0 14px; }
+.tile-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.tile-desc {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  opacity: 0.9;
+}
+.tile-shape {
+  position: absolute;
+  right: -18px; bottom: -18px;
+  width: 70px; height: 70px;
+  border: 3px solid var(--navy);
+  border-radius: 50%;
+  background: transparent;
+}
 
-/* ===================== 입력 / 버튼 ===================== */
-input {
+/* ===== 폼 ===== */
+.form-card {
+  background: var(--cream);
+  border: 3px solid var(--navy);
+  padding: 28px 24px 28px;
+  box-shadow: 7px 7px 0 var(--navy);
+  margin-bottom: 20px;
+}
+.form-field { margin-bottom: 18px; }
+.form-field:last-of-type { margin-bottom: 24px; }
+.form-field label {
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.form-field input {
   width: 100%;
-  padding: 13px 14px;
-  font-size: 16px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--sans);
+  border: 2px solid var(--navy);
   background: #fff;
-  color: var(--text);
-  transition: border-color .15s;
+  color: var(--navy);
+  border-radius: 0;
 }
-input:focus { outline: none; border-color: var(--primary); }
-
-.search-row { display: flex; gap: 8px; }
-.search-row input { flex: 1; }
-.search-row .btn { flex: 0 0 auto; }
-
-.form-grid { display: grid; gap: 10px; margin-bottom: 12px; }
-
-.btn {
-  padding: 13px 20px;
-  font-size: 15px;
-  font-weight: 700;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform .05s, background .15s, opacity .15s;
-}
-.btn:active { transform: scale(.97); }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-dark); }
-.btn-block { display: block; width: 100%; }
-.btn-success { background: var(--avail); color: #fff; }
-.btn-danger { background: var(--overdue); color: #fff; }
-.btn-outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
-.btn:disabled { opacity: .55; cursor: default; }
-
-.btn-text {
-  background: none; border: none; color: var(--primary);
-  font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 4px;
+.form-field input:focus {
+  outline: none;
+  background: var(--yellow);
 }
 
-.inline-msg { margin-top: 10px; font-size: 14px; min-height: 18px; }
-.inline-msg.ok { color: var(--avail); }
-.inline-msg.err { color: var(--overdue); }
-
-/* ===================== 우산 상태 결과 카드 ===================== */
-.result-card { border-left: 6px solid var(--border); }
-.result-card.available { border-left-color: var(--avail); }
-.result-card.rented    { border-left-color: var(--rented); }
-.result-card.overdue   { border-left-color: var(--overdue); }
-
-.status-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-.umb-num { font-size: 26px; font-weight: 800; }
-.umb-name { font-size: 14px; color: var(--muted); }
-
-.badge {
-  display: inline-block; padding: 5px 12px; border-radius: 999px;
-  font-size: 13px; font-weight: 700;
+/* ===== 성공 화면 ===== */
+.view-success { text-align: center; padding-top: 8vh; }
+.success-icon {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 120px; height: 120px;
+  background: var(--mint);
+  border: 3px solid var(--navy);
+  border-radius: 50%;
+  font-size: 64px;
+  font-weight: 900;
+  margin-bottom: 32px;
+  box-shadow: 8px 8px 0 var(--navy);
+  font-family: var(--serif);
+  color: var(--navy);
 }
-.badge.available { background: var(--avail-bg); color: var(--avail); }
-.badge.rented    { background: var(--rented-bg); color: var(--rented); }
-.badge.overdue   { background: var(--overdue-bg); color: var(--overdue); }
-.badge.notreg    { background: #e5e7eb; color: var(--muted); }
-
-.info-box {
-  background: var(--bg); border-radius: 10px; padding: 12px 14px;
-  margin: 14px 0; font-size: 14px;
+.success-title {
+  font-family: var(--serif);
+  font-size: clamp(48px, 12vw, 72px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+  line-height: 1;
 }
-.info-box .row { display: flex; justify-content: space-between; padding: 3px 0; }
-.info-box .row span:first-child { color: var(--muted); }
-.info-box .row span:last-child { font-weight: 600; }
-
-.section-label { font-size: 13px; font-weight: 700; color: var(--muted); margin: 16px 0 8px; }
-
-/* ===================== 통계 그리드 ===================== */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-.stat {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 16px 8px; text-align: center;
-}
-.stat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
-.stat-label { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
-.stat-total .stat-num { color: var(--primary); }
-.stat-avail .stat-num { color: var(--avail); }
-.stat-rented .stat-num { color: var(--rented); }
-.stat-overdue .stat-num { color: var(--overdue); }
-
-/* ===================== 리스트 ===================== */
-.list { display: flex; flex-direction: column; gap: 10px; }
-.list-item {
-  border: 1px solid var(--border); border-radius: 12px; padding: 14px;
-  display: flex; align-items: center; gap: 12px;
-}
-.list-item.overdue { border-color: var(--overdue); background: var(--overdue-bg); }
-.li-main { flex: 1; min-width: 0; }
-.li-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.li-sub { font-size: 13px; color: var(--muted); margin-top: 4px; word-break: break-all; }
-.li-actions { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
-.li-actions .btn { padding: 9px 14px; font-size: 13px; }
-
-.dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
-.dot.available { background: var(--avail); }
-.dot.rented { background: var(--rented); }
-.dot.overdue { background: var(--overdue); }
-
-.empty { text-align: center; color: var(--muted); padding: 28px 10px; font-size: 14px; }
-
-/* ===================== 관리자 바 ===================== */
-.admin-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.admin-badge {
-  background: #eef2ff; color: var(--primary); font-size: 13px; font-weight: 700;
-  padding: 6px 12px; border-radius: 999px;
+.success-msg {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 19px;
+  margin-bottom: 40px;
+  opacity: 0.85;
+  padding: 0 12px;
 }
 
-/* ===================== 로그인 ===================== */
-.login-card { text-align: center; max-width: 380px; margin: 30px auto; }
-.lock-icon { font-size: 44px; margin-bottom: 8px; }
-.login-card .search-row { margin-top: 8px; }
-
-/* ===================== 테이블 ===================== */
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
-.data-table th, .data-table td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-.data-table th { color: var(--muted); font-weight: 700; background: var(--bg); position: sticky; top: 0; }
-.tag { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-.tag.rented { background: var(--rented-bg); color: var(--rented); }
-.tag.returned { background: var(--avail-bg); color: var(--avail); }
-
-/* ===================== QR 모달 ===================== */
-.modal {
-  display: none; position: fixed; inset: 0; z-index: 50;
-  background: rgba(0,0,0,.55); align-items: center; justify-content: center; padding: 20px;
-}
-.modal.show { display: flex; }
-.modal-box {
-  background: #fff; border-radius: 18px; padding: 24px; text-align: center;
-  max-width: 340px; width: 100%; position: relative;
-}
-.modal-box h3 { font-size: 18px; margin-bottom: 16px; }
-.modal-box img { width: 220px; height: 220px; border-radius: 10px; }
-.modal-close {
-  position: absolute; top: 12px; right: 14px; background: none; border: none;
-  font-size: 20px; cursor: pointer; color: var(--muted);
-}
-.qr-link { font-size: 12px; color: var(--muted); margin: 12px 0 16px; word-break: break-all; }
-
-/* ===================== 로딩 / 토스트 ===================== */
-.overlay {
-  display: none; position: fixed; inset: 0; z-index: 60;
-  background: rgba(255,255,255,.6); align-items: center; justify-content: center;
-}
-.overlay.show { display: flex; }
-.spinner {
-  width: 42px; height: 42px; border: 4px solid var(--border);
-  border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.toast {
-  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
-  background: #1f2937; color: #fff; padding: 13px 20px; border-radius: 10px;
-  font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none;
-  transition: opacity .25s, transform .25s; z-index: 70; max-width: 90%; text-align: center;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.err { background: var(--overdue); }
-.toast.ok { background: var(--avail); }
-
-/* ===================== 푸터 ===================== */
+/* ===== 푸터 ===== */
 .app-footer {
-  text-align: center; font-size: 12px; color: var(--muted);
-  padding: 18px; padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  margin-top: auto;
+  padding: 32px 0 16px;
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--navy);
+  opacity: 0.5;
 }
 .admin-entry {
-  display: inline-block; margin-top: 10px;
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); font-size: 12px; text-decoration: underline;
-  padding: 6px 10px;
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--navy);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+  margin-top: 8px;
+  opacity: 0.7;
 }
 body.admin-on .admin-entry { display: none; }
 
-/* ===================== 반응형 ===================== */
-@media (max-width: 480px) {
-  .brand-text h1 { font-size: 18px; }
-  .tab { font-size: 13px; padding: 13px 10px; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .umb-num { font-size: 22px; }
-  .list-item { flex-direction: column; align-items: stretch; }
-  .li-actions { flex-direction: row; }
-  .li-actions .btn { flex: 1; }
+/* ===== 토스트 ===== */
+.toast {
+  position: fixed;
+  left: 50%; bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy);
+  color: var(--cream);
+  padding: 14px 24px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid var(--navy);
+  box-shadow: 4px 4px 0 var(--magenta);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 100;
+  max-width: 88%;
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err  { background: var(--magenta); color: var(--cream); box-shadow: 4px 4px 0 var(--navy); }
+.toast.ok   { background: var(--mint); color: var(--navy); box-shadow: 4px 4px 0 var(--navy); }
+
+/* ===== 로딩 오버레이 ===== */
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(244, 236, 216, 0.85);
+  align-items: center; justify-content: center;
+  z-index: 200;
+}
+.overlay.show { display: flex; }
+.spinner {
+  width: 56px; height: 56px;
+  border: 4px solid var(--navy);
+  border-top-color: var(--yellow);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== 관리자 영역 (유지, 톤만 통일) ===== */
+.admin-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px;
+}
+.admin-badge {
+  background: var(--navy); color: var(--cream);
+  font-family: var(--sans);
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.2em;
+  padding: 7px 14px;
+}
+.admin-section-title {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.admin-tab {
+  background: var(--cream);
+  border: 2px solid var(--navy);
+  padding: 10px 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-tab.active {
+  background: var(--navy);
+  color: var(--cream);
 }
 
-@media (min-width: 768px) {
-  .form-grid { grid-template-columns: 1fr 1fr; }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.stat {
+  border: 2px solid var(--navy);
+  padding: 14px 8px;
+  text-align: center;
+  background: var(--cream);
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 900;
+  display: block;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-top: 6px;
+  display: block;
+  opacity: 0.7;
+}
+.stat-avail .stat-num   { color: var(--navy); }
+.stat-rented .stat-num  { color: var(--magenta); }
+.stat-overdue .stat-num { color: var(--magenta); }
+.stat-overdue           { background: var(--magenta); color: var(--cream); }
+.stat-overdue .stat-num { color: var(--cream); }
+
+.admin-card {
+  background: var(--cream);
+  border: 2px solid var(--navy);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.admin-card-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.admin-card-title {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 19px;
+}
+.btn-text {
+  background: none; border: none;
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 700;
+  color: var(--navy);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.list { display: flex; flex-direction: column; gap: 10px; }
+.list-item {
+  border: 2px solid var(--navy);
+  background: var(--cream);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.list-item.overdue { background: var(--magenta); color: var(--cream); }
+.li-main { flex: 1; min-width: 0; }
+.li-title {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.li-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  word-break: break-all;
+}
+.li-actions { display: flex; flex-direction: column; gap: 6px; }
+.li-actions .btn-sm {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border: 2px solid var(--navy);
+  background: var(--yellow);
+  cursor: pointer;
+}
+.li-actions .btn-sm.danger { background: var(--magenta); color: var(--cream); }
+
+.empty {
+  text-align: center;
+  padding: 32px 12px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+.form-grid { display: grid; gap: 12px; margin-bottom: 14px; }
+.form-grid input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: var(--sans);
+  border: 2px solid var(--navy);
+  background: #fff;
+}
+
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 520px;
+}
+.data-table th, .data-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--navy);
+}
+.data-table th {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  background: var(--navy);
+  color: var(--cream);
+  position: sticky; top: 0;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border: 2px solid var(--navy);
+}
+.tag.rented { background: var(--magenta); color: var(--cream); }
+.tag.returned { background: var(--mint); }
+
+.inline-msg { margin-top: 10px; font-size: 13px; font-weight: 600; min-height: 18px; }
+.inline-msg.ok  { color: #1c8a4f; }
+.inline-msg.err { color: #c81b58; }
+
+/* ===== 로그인 카드 ===== */
+.login-card {
+  text-align: center;
+  background: var(--yellow);
+  border: 3px solid var(--navy);
+  padding: 36px 24px;
+  box-shadow: 8px 8px 0 var(--navy);
+  margin: 20px auto;
+  max-width: 440px;
+}
+.lock-icon { font-size: 50px; margin-bottom: 12px; }
+.login-card .form-field { text-align: left; }
+.login-card .form-field input { background: var(--cream); }
+
+/* ===== QR 모달 ===== */
+.modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(13, 26, 60, 0.7);
+  align-items: center; justify-content: center;
+  padding: 20px;
+  z-index: 300;
+}
+.modal.show { display: flex; }
+.modal-box {
+  background: var(--cream);
+  border: 3px solid var(--navy);
+  padding: 28px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  position: relative;
+  box-shadow: 10px 10px 0 var(--magenta);
+}
+.modal-box h3 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+.modal-box img {
+  width: 240px; height: 240px;
+  border: 2px solid var(--navy);
+}
+.modal-close {
+  position: absolute;
+  top: 12px; right: 14px;
+  background: none; border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--navy);
+}
+.qr-link {
+  font-size: 12px;
+  font-family: var(--sans);
+  margin: 14px 0 18px;
+  word-break: break-all;
+  opacity: 0.7;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 480px) {
+  .tile-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .decor-circle-yellow { width: 180px; height: 180px; }
+  .decor-blob-mint { width: 130px; height: 130px; }
+  .decor-star { font-size: 70px; right: 4%; }
+  .list-item { flex-direction: column; align-items: stretch; }
+  .li-actions { flex-direction: row; }
+  .li-actions .btn-sm { flex: 1; }
 }
   </style>
 </head>
 <body>
+
+  <!-- 흩어진 도형 데코 -->
+  <div class="decor decor-circle-yellow"></div>
+  <div class="decor decor-triangle-magenta"></div>
+  <div class="decor decor-blob-mint"></div>
+  <div class="decor-stripe"></div>
+  <div class="decor-dot-grid"></div>
+  <div class="decor-star">✦</div>
+
   <div class="app">
-
-    <header class="app-header">
-      <div class="brand">
-        <span class="brand-logo">☂️</span>
-        <div class="brand-text">
-          <h1>학교 우산 대여</h1>
-          <p>필요할 때 빌리고, 다 쓰면 반납해요</p>
-        </div>
-      </div>
-    </header>
-
-    <nav class="tabs" id="tabs">
-      <button class="tab active" data-tab="scan">🔍 우산 스캔</button>
-      <button class="tab admin-only" data-tab="status">📋 대여 현황</button>
-      <button class="tab admin-only" data-tab="manage">☂️ 우산 관리</button>
-      <button class="tab admin-only" data-tab="history">🕓 대여 기록</button>
-    </nav>
-
     <main class="content">
 
-      <!-- 1. 우산 스캔 -->
-      <section class="view active" id="view-scan">
-        <div class="card">
-          <h2 class="card-title">우산 번호 확인</h2>
-          <p class="card-desc">우산에 적힌 번호를 입력하거나 QR을 스캔해 접속하세요.</p>
-          <div class="search-row">
-            <input type="text" id="scanInput" inputmode="text" placeholder="예: 12" autocomplete="off">
-            <button class="btn btn-primary" id="scanBtn">확인</button>
-          </div>
+      <!-- ===== 1. 시작 페이지 ===== -->
+      <section class="view view-start active" id="view-start">
+        <div class="brand-eyebrow">RAINY <span class="dot"></span> DAY <span class="dot"></span> 2026</div>
+        <h1 class="hero-title">
+          <span class="row"><span class="serif">학교</span></span>
+          <span class="row"><span class="italic">우산</span><span class="hero-shape-inline"></span></span>
+          <span class="row"><span class="sans underline">대여</span></span>
+        </h1>
+        <p class="hero-sub">비 오는 날의 <span class="accent">작은 도움</span></p>
+        <div class="start-actions">
+          <button class="btn-cta btn-cta-navy" id="startBtn">시작하기 →</button>
         </div>
-        <div id="scanResult"></div>
       </section>
 
-      <!-- 관리자 로그인 -->
-      <section class="view" id="view-login" style="display:none">
-        <div class="card login-card">
+      <!-- ===== 2. 서비스 선택 ===== -->
+      <section class="view" id="view-choose">
+        <div class="section-eyebrow">SELECT · 선택</div>
+        <h2 class="section-title">무엇을 <span class="italic">할까요?</span></h2>
+        <p class="section-sub">대여하시거나 반납하실 수 있어요.</p>
+
+        <div class="tile-grid">
+          <button class="tile tile-rent" data-action="rent">
+            <div class="tile-icon">☔</div>
+            <div class="tile-title">대여</div>
+            <div class="tile-desc">우산을 빌립니다</div>
+            <div class="tile-shape"></div>
+          </button>
+          <button class="tile tile-return" data-action="return">
+            <div class="tile-icon">🌤️</div>
+            <div class="tile-title">반납</div>
+            <div class="tile-desc">우산을 돌려줍니다</div>
+            <div class="tile-shape"></div>
+          </button>
+        </div>
+
+        <button class="btn-back" data-back="start">← 처음으로</button>
+      </section>
+
+      <!-- ===== 3. 대여 폼 ===== -->
+      <section class="view" id="view-rent">
+        <div class="section-eyebrow">RENT · 대여</div>
+        <h2 class="section-title">우산 <span class="italic">대여</span></h2>
+        <p class="section-sub">필요한 정보를 입력해 주세요.</p>
+
+        <form class="form-card" id="rentForm" autocomplete="off">
+          <div class="form-field">
+            <label for="rentUmbNumber">우산 번호</label>
+            <input type="text" id="rentUmbNumber" placeholder="예: 12" required>
+          </div>
+          <div class="form-field">
+            <label for="rentName">이름</label>
+            <input type="text" id="rentName" placeholder="홍길동" required>
+          </div>
+          <div class="form-field">
+            <label for="rentSid">학번</label>
+            <input type="text" id="rentSid" inputmode="numeric" placeholder="2026001" required>
+          </div>
+          <div class="form-field">
+            <label for="rentPhone">전화번호</label>
+            <input type="tel" id="rentPhone" inputmode="tel" placeholder="010-1234-5678" required>
+          </div>
+          <button type="submit" class="btn-cta btn-cta-magenta btn-block">대여 신청 →</button>
+        </form>
+
+        <button class="btn-back" data-back="choose">← 뒤로</button>
+      </section>
+
+      <!-- ===== 4. 반납 폼 ===== -->
+      <section class="view" id="view-return">
+        <div class="section-eyebrow">RETURN · 반납</div>
+        <h2 class="section-title">우산 <span class="italic">반납</span></h2>
+        <p class="section-sub">본인 확인 후 자동으로 처리됩니다.</p>
+
+        <form class="form-card" id="returnForm" autocomplete="off">
+          <div class="form-field">
+            <label for="retSid">학번</label>
+            <input type="text" id="retSid" inputmode="numeric" placeholder="2026001" required>
+          </div>
+          <div class="form-field">
+            <label for="retName">이름</label>
+            <input type="text" id="retName" placeholder="홍길동" required>
+          </div>
+          <button type="submit" class="btn-cta btn-cta-mint btn-block">반납 →</button>
+        </form>
+
+        <button class="btn-back" data-back="choose">← 뒤로</button>
+      </section>
+
+      <!-- ===== 5. 성공 ===== -->
+      <section class="view view-success" id="view-success">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title" id="successTitle">완료</h2>
+        <p class="success-msg" id="successMsg"></p>
+        <button class="btn-cta btn-cta-yellow" data-back="start">처음으로</button>
+      </section>
+
+      <!-- ===== 관리자 로그인 ===== -->
+      <section class="view" id="view-login">
+        <div class="login-card">
           <div class="lock-icon">🔒</div>
-          <h2 class="card-title">관리자 로그인</h2>
-          <p class="card-desc">관리자 비밀번호를 입력하세요.</p>
-          <div class="search-row">
-            <input type="password" id="adminPw" placeholder="비밀번호" autocomplete="current-password">
-            <button class="btn btn-primary" id="loginBtn">로그인</button>
+          <h2 class="admin-section-title" style="text-align:center">관리자</h2>
+          <p class="section-sub" style="margin-bottom:20px">비밀번호를 입력하세요.</p>
+          <div class="form-field">
+            <label for="adminPw">PASSWORD</label>
+            <input type="password" id="adminPw" placeholder="••••••" autocomplete="current-password">
           </div>
+          <button class="btn-cta btn-cta-navy btn-block" id="loginBtn">로그인</button>
           <div id="loginMsg" class="inline-msg"></div>
-          <button class="btn-text" id="loginCancel">← 학생 화면으로 돌아가기</button>
+          <button class="btn-back" id="loginCancel">← 학생 화면으로</button>
         </div>
       </section>
 
-      <!-- 2. 대여 현황 -->
-      <section class="view admin-view" id="view-status">
+      <!-- ===== 관리자: 대여 현황 ===== -->
+      <section class="view" id="view-status">
         <div class="admin-bar">
-          <span class="admin-badge">👤 관리자</span>
+          <span class="admin-badge">ADMIN</span>
           <button class="btn-text" id="logoutBtn1">로그아웃</button>
+        </div>
+        <h2 class="admin-section-title">대여 현황</h2>
+        <div class="admin-tabs" id="adminNav">
+          <button class="admin-tab active" data-anav="status">현황</button>
+          <button class="admin-tab" data-anav="manage">우산 관리</button>
+          <button class="admin-tab" data-anav="history">기록</button>
         </div>
 
         <div class="stats-grid">
-          <div class="stat stat-total">  <span class="stat-num" id="statTotal">-</span>   <span class="stat-label">전체 우산</span></div>
-          <div class="stat stat-avail">  <span class="stat-num" id="statAvail">-</span>   <span class="stat-label">대여 가능</span></div>
-          <div class="stat stat-rented"> <span class="stat-num" id="statRented">-</span>  <span class="stat-label">대여 중</span></div>
+          <div class="stat stat-total">  <span class="stat-num" id="statTotal">-</span>   <span class="stat-label">전체</span></div>
+          <div class="stat stat-avail">  <span class="stat-num" id="statAvail">-</span>   <span class="stat-label">가능</span></div>
+          <div class="stat stat-rented"> <span class="stat-num" id="statRented">-</span>  <span class="stat-label">대여중</span></div>
           <div class="stat stat-overdue"><span class="stat-num" id="statOverdue">-</span> <span class="stat-label">연체</span></div>
         </div>
 
-        <div class="card">
-          <div class="card-head">
-            <h2 class="card-title">대여 중인 우산</h2>
+        <div class="admin-card">
+          <div class="admin-card-head">
+            <span class="admin-card-title">대여 중인 우산</span>
             <button class="btn-text" id="refreshStatus">↻ 새로고침</button>
           </div>
           <div id="activeList" class="list"></div>
         </div>
       </section>
 
-      <!-- 3. 우산 관리 -->
-      <section class="view admin-view" id="view-manage">
+      <!-- ===== 관리자: 우산 관리 ===== -->
+      <section class="view" id="view-manage">
         <div class="admin-bar">
-          <span class="admin-badge">👤 관리자</span>
+          <span class="admin-badge">ADMIN</span>
           <button class="btn-text" id="logoutBtn2">로그아웃</button>
         </div>
+        <h2 class="admin-section-title">우산 관리</h2>
+        <div class="admin-tabs">
+          <button class="admin-tab" data-anav="status">현황</button>
+          <button class="admin-tab active" data-anav="manage">우산 관리</button>
+          <button class="admin-tab" data-anav="history">기록</button>
+        </div>
 
-        <div class="card">
-          <h2 class="card-title">우산 등록</h2>
+        <div class="admin-card">
+          <div class="admin-card-title" style="margin-bottom:12px">우산 등록</div>
           <div class="form-grid">
             <input type="text" id="newUmbNumber" placeholder="우산 번호 (예: 12)">
-            <input type="text" id="newUmbName" placeholder="우산명 (선택, 예: 장우산)">
+            <input type="text" id="newUmbName" placeholder="우산명 (선택)">
           </div>
-          <button class="btn btn-primary btn-block" id="registerBtn">＋ 우산 등록</button>
+          <button class="btn-cta btn-cta-yellow btn-block" id="registerBtn">＋ 우산 등록</button>
           <div id="manageMsg" class="inline-msg"></div>
         </div>
 
-        <div class="card">
-          <div class="card-head">
-            <h2 class="card-title">등록된 우산 · QR</h2>
+        <div class="admin-card">
+          <div class="admin-card-head">
+            <span class="admin-card-title">등록된 우산 · QR</span>
             <button class="btn-text" id="refreshManage">↻ 새로고침</button>
           </div>
           <div id="umbList" class="list"></div>
         </div>
       </section>
 
-      <!-- 4. 대여 기록 -->
-      <section class="view admin-view" id="view-history">
+      <!-- ===== 관리자: 대여 기록 ===== -->
+      <section class="view" id="view-history">
         <div class="admin-bar">
-          <span class="admin-badge">👤 관리자</span>
+          <span class="admin-badge">ADMIN</span>
           <button class="btn-text" id="logoutBtn3">로그아웃</button>
         </div>
+        <h2 class="admin-section-title">대여 기록</h2>
+        <div class="admin-tabs">
+          <button class="admin-tab" data-anav="status">현황</button>
+          <button class="admin-tab" data-anav="manage">우산 관리</button>
+          <button class="admin-tab active" data-anav="history">기록</button>
+        </div>
 
-        <div class="card">
-          <div class="card-head">
-            <h2 class="card-title">전체 대여 기록</h2>
+        <div class="admin-card">
+          <div class="admin-card-head">
+            <span class="admin-card-title">전체 기록</span>
             <button class="btn-text" id="refreshHistory">↻ 새로고침</button>
           </div>
           <div class="table-wrap">
-            <table class="data-table" id="historyTable">
+            <table class="data-table">
               <thead>
                 <tr><th>우산</th><th>이름</th><th>학번</th><th>대여</th><th>반납</th><th>상태</th></tr>
               </thead>
@@ -424,7 +913,7 @@ body.admin-on .admin-entry { display: none; }
     </main>
 
     <footer class="app-footer">
-      ☔ 우산 대여 시스템 · 24시간 이상 미반납 시 연체 처리<br>
+      24시간 이상 미반납 시 연체 처리<br>
       <button class="admin-entry" id="adminEntry">관리자 로그인</button>
     </footer>
   </div>
@@ -437,18 +926,16 @@ body.admin-on .admin-entry { display: none; }
       <h3 id="qrTitle">QR 코드</h3>
       <img id="qrImage" alt="QR 코드" />
       <p class="qr-link" id="qrLink"></p>
-      <a class="btn btn-primary btn-block" id="qrDownload" download>QR 이미지 저장</a>
+      <a class="btn-cta btn-cta-navy btn-block" id="qrDownload" download>QR 이미지 저장</a>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-  /* ===================== 전역 상태 ===================== */
+  /* ===================== 전역 ===================== */
   var adminPassword = '';
   var pendingAdminTab = null;
-  var ADMIN_TABS = ['status', 'manage', 'history'];
-
   var INITIAL_UMBRELLA = new URLSearchParams(location.search).get('umbrella') || '';
 
   /* ===================== 유틸 ===================== */
@@ -471,178 +958,130 @@ body.admin-on .admin-entry { display: none; }
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  /* HTTP 호출 헬퍼 (옛 call() 자리) */
+  /* HTTP */
   async function api(path, opts) {
     opts = opts || {};
-    var method = opts.method || 'GET';
     var headers = {};
     if (opts.body) headers['Content-Type'] = 'application/json';
     if (opts.admin) headers['x-admin-password'] = adminPassword;
-
     try {
       var res = await fetch('/api' + path, {
-        method: method,
+        method: opts.method || 'GET',
         headers: headers,
         body: opts.body ? JSON.stringify(opts.body) : undefined,
       });
       var data = await res.json().catch(function () { return null; });
-      if (!data) return { ok: false, message: '서버 응답 오류' };
-      return data;
+      return data || { ok: false, message: '서버 응답 오류' };
     } catch (e) {
       return { ok: false, message: '네트워크 오류: ' + e.message };
     }
   }
 
-  /* ===================== 탭 전환 ===================== */
-  function switchTab(tab) {
-    if (ADMIN_TABS.indexOf(tab) >= 0 && !adminPassword) {
-      showAdminLogin();
-      return;
-    }
-    setActiveTabButton(tab);
-    showOnlyView('view-' + tab);
-    if (tab === 'status')  loadStatus();
-    if (tab === 'manage')  loadUmbrellas();
-    if (tab === 'history') loadHistory();
+  /* ===================== 뷰 전환 ===================== */
+  // 학생 뷰 / 관리자 뷰 한 곳에서 관리.
+  var VIEWS = ['start', 'choose', 'rent', 'return', 'success',
+               'login', 'status', 'manage', 'history'];
+
+  function navigate(name) {
+    VIEWS.forEach(function (v) {
+      var el = $('view-' + v);
+      if (!el) return;
+      var on = (v === name);
+      el.classList.toggle('active', on);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 관리자 탭 진입 시 데이터 로드
+    if (name === 'status')  loadStatus();
+    if (name === 'manage')  loadUmbrellas();
+    if (name === 'history') loadHistory();
   }
 
+  /* ===================== 학생 플로우 ===================== */
+  function goStart()  { navigate('start'); }
+  function goChoose() { navigate('choose'); }
+  function goRent(prefillNumber) {
+    navigate('rent');
+    if (prefillNumber) { $('rentUmbNumber').value = prefillNumber; setTimeout(function(){ $('rentName').focus(); }, 100); }
+    else { setTimeout(function(){ $('rentUmbNumber').focus(); }, 100); }
+  }
+  function goReturn() {
+    navigate('return');
+    setTimeout(function(){ $('retSid').focus(); }, 100);
+  }
+  function goSuccess(title, msg) {
+    $('successTitle').textContent = title || '완료';
+    $('successMsg').textContent = msg || '';
+    navigate('success');
+  }
+
+  /* 대여 신청 */
+  async function submitRent(e) {
+    e.preventDefault();
+    var payload = {
+      umbrellaNumber: $('rentUmbNumber').value.trim(),
+      name:          $('rentName').value.trim(),
+      studentId:     $('rentSid').value.trim(),
+      phone:         $('rentPhone').value.trim(),
+    };
+    if (!payload.umbrellaNumber || !payload.name || !payload.studentId || !payload.phone) {
+      toast('모든 항목을 입력해주세요.', 'err'); return;
+    }
+
+    showLoading(true);
+    var res = await api('/rent', { method: 'POST', body: payload });
+    showLoading(false);
+
+    if (res.ok) {
+      // 폼 비우고 success 뷰로
+      ['rentUmbNumber', 'rentName', 'rentSid', 'rentPhone'].forEach(function(id){ $(id).value = ''; });
+      goSuccess('대여 완료', res.message);
+    } else {
+      toast(res.message, 'err');
+    }
+  }
+
+  /* 반납 (학번 + 이름만) */
+  async function submitReturn(e) {
+    e.preventDefault();
+    var payload = {
+      name:      $('retName').value.trim(),
+      studentId: $('retSid').value.trim(),
+    };
+    if (!payload.name || !payload.studentId) {
+      toast('이름과 학번을 입력해주세요.', 'err'); return;
+    }
+
+    showLoading(true);
+    var res = await api('/return', { method: 'POST', body: payload });
+    showLoading(false);
+
+    if (res.ok) {
+      $('retName').value = ''; $('retSid').value = '';
+      goSuccess('반납 완료', res.message);
+    } else {
+      toast(res.message, 'err');
+    }
+  }
+
+  /* ===================== 관리자 로그인 ===================== */
   function showAdminLogin() {
-    if (adminPassword) { switchTab('status'); return; }
+    if (adminPassword) { navigate('status'); return; }
     pendingAdminTab = 'status';
-    setActiveTabButton('');
-    showOnlyView('view-login');
+    navigate('login');
     $('adminPw').value = '';
     $('loginMsg').textContent = '';
     setTimeout(function () { $('adminPw').focus(); }, 100);
   }
 
-  function setActiveTabButton(tab) {
-    var btns = document.querySelectorAll('.tab');
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].classList.toggle('active', btns[i].getAttribute('data-tab') === tab);
-    }
-  }
-
-  function showOnlyView(viewId) {
-    var views = document.querySelectorAll('.view');
-    for (var i = 0; i < views.length; i++) {
-      var v = views[i];
-      var on = v.id === viewId;
-      v.classList.toggle('active', on);
-      v.style.display = on ? 'block' : 'none';
-    }
-  }
-
-  /* ===================== 학생: 우산 스캔 ===================== */
-  async function doScan() {
-    var num = $('scanInput').value.trim();
-    if (!num) { toast('우산 번호를 입력해주세요.', 'err'); return; }
-
-    showLoading(true);
-    var res = await api('/status?umbrella=' + encodeURIComponent(num));
-    showLoading(false);
-    if (!res.ok) { toast(res.message, 'err'); return; }
-    renderScanResult(res);
-  }
-
-  function renderScanResult(res) {
-    var box = $('scanResult');
-
-    if (!res.registered) {
-      box.innerHTML =
-        '<div class="card result-card">' +
-          '<div class="status-top">' +
-            '<span class="umb-num">' + esc(res.umbrellaNumber) + '</span>' +
-            '<span class="badge notreg">미등록</span>' +
-          '</div>' +
-          '<p class="card-desc">등록되지 않은 우산입니다. 관리자에게 문의해주세요.</p>' +
-        '</div>';
-      return;
-    }
-
-    var statusText = { available: '대여 가능', rented: '대여 중', overdue: '연체' }[res.status];
-
-    var html =
-      '<div class="card result-card ' + res.status + '">' +
-        '<div class="status-top">' +
-          '<span class="umb-num">' + esc(res.umbrellaNumber) + '</span>' +
-          '<span class="badge ' + res.status + '">' + statusText + '</span>' +
-        '</div>' +
-        '<div class="umb-name">' + esc(res.umbrellaName || '') + '</div>';
-
-    if (res.status === 'available') {
-      html +=
-        '<div class="section-label">대여하기 — 정보를 입력하세요</div>' +
-        '<div class="form-grid">' +
-          '<input type="text" id="rentName" placeholder="이름">' +
-          '<input type="text" id="rentSid" inputmode="numeric" placeholder="학번">' +
-          '<input type="tel" id="rentPhone" inputmode="tel" placeholder="전화번호 (010-1234-5678)">' +
-        '</div>' +
-        '<button class="btn btn-success btn-block" onclick="doRent(\'' + esc(res.umbrellaNumber) + '\')">☂️ 대여하기</button>';
-    } else {
-      html +=
-        '<div class="info-box">' +
-          '<div class="row"><span>대여자</span><span>' + esc(res.renter.name) + '</span></div>' +
-          '<div class="row"><span>대여 시간</span><span>' + esc(res.renter.rentTime) + '</span></div>' +
-          '<div class="row"><span>경과</span><span>' + esc(res.hours) + '시간</span></div>' +
-        '</div>';
-      if (res.status === 'overdue') {
-        html += '<p class="card-desc" style="color:var(--overdue);font-weight:600">⚠️ 24시간이 지난 연체 상태입니다. 빠른 반납 부탁드려요.</p>';
-      }
-      html +=
-        '<div class="section-label">반납하기 — 본인 확인</div>' +
-        '<div class="form-grid">' +
-          '<input type="text" id="retName" placeholder="이름">' +
-          '<input type="text" id="retSid" inputmode="numeric" placeholder="학번">' +
-        '</div>' +
-        '<button class="btn btn-primary btn-block" onclick="doReturn(\'' + esc(res.umbrellaNumber) + '\')">✅ 반납하기</button>';
-    }
-
-    html += '</div>';
-    box.innerHTML = html;
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  async function doRent(num) {
-    var payload = {
-      umbrellaNumber: num,
-      name: $('rentName').value.trim(),
-      studentId: $('rentSid').value.trim(),
-      phone: $('rentPhone').value.trim()
-    };
-    if (!payload.name || !payload.studentId || !payload.phone) {
-      toast('모든 항목을 입력해주세요.', 'err'); return;
-    }
-    showLoading(true);
-    var res = await api('/rent', { method: 'POST', body: payload });
-    showLoading(false);
-    toast(res.message, res.ok ? 'ok' : 'err');
-    if (res.ok) { $('scanInput').value = num; doScan(); }
-  }
-
-  async function doReturn(num) {
-    var payload = {
-      umbrellaNumber: num,
-      name: $('retName').value.trim(),
-      studentId: $('retSid').value.trim()
-    };
-    if (!payload.name || !payload.studentId) {
-      toast('이름과 학번을 입력해주세요.', 'err'); return;
-    }
-    showLoading(true);
-    var res = await api('/return', { method: 'POST', body: payload });
-    showLoading(false);
-    toast(res.message, res.ok ? 'ok' : 'err');
-    if (res.ok) { $('scanInput').value = num; doScan(); }
-  }
-
-  /* ===================== 관리자: 로그인 ===================== */
   async function doLogin() {
     var pw = $('adminPw').value;
-    if (!pw) { $('loginMsg').textContent = '비밀번호를 입력하세요.'; $('loginMsg').className = 'inline-msg err'; return; }
-
+    if (!pw) {
+      $('loginMsg').textContent = '비밀번호를 입력하세요.';
+      $('loginMsg').className = 'inline-msg err';
+      return;
+    }
     showLoading(true);
-    // 비밀번호 후보를 헤더에 실어 검증
     adminPassword = pw;
     var res = await api('/admin/login', { method: 'POST', admin: true });
     showLoading(false);
@@ -650,7 +1089,7 @@ body.admin-on .admin-entry { display: none; }
       document.body.classList.add('admin-on');
       var go = pendingAdminTab || 'status';
       pendingAdminTab = null;
-      switchTab(go);
+      navigate(go);
       toast('관리자로 로그인했습니다.', 'ok');
     } else {
       adminPassword = '';
@@ -662,16 +1101,23 @@ body.admin-on .admin-entry { display: none; }
   function doLogout() {
     adminPassword = '';
     document.body.classList.remove('admin-on');
-    switchTab('scan');
+    navigate('start');
     toast('로그아웃되었습니다.');
   }
 
-  /* ===================== 관리자: 대여 현황 ===================== */
+  function handleAuthFail(msg) {
+    toast(msg || '다시 로그인해주세요.', 'err');
+    adminPassword = '';
+    document.body.classList.remove('admin-on');
+    navigate('start');
+  }
+
+  /* ===================== 관리자: 현황 ===================== */
   async function loadStatus() {
     showLoading(true);
     var pair = await Promise.all([
       api('/admin/stats',  { admin: true }),
-      api('/admin/active', { admin: true })
+      api('/admin/active', { admin: true }),
     ]);
     showLoading(false);
     var stats = pair[0], active = pair[1];
@@ -681,29 +1127,22 @@ body.admin-on .admin-entry { display: none; }
     $('statAvail').textContent   = stats.available;
     $('statRented').textContent  = stats.rented;
     $('statOverdue').textContent = stats.overdue;
-
     renderActiveList(active.list);
   }
 
   function renderActiveList(list) {
     var box = $('activeList');
-    if (!list.length) { box.innerHTML = '<div class="empty">현재 대여 중인 우산이 없습니다. ☀️</div>'; return; }
-
+    if (!list.length) { box.innerHTML = '<div class="empty">현재 대여 중인 우산이 없습니다.</div>'; return; }
     box.innerHTML = list.map(function (it) {
-      var cls = it.overdue ? 'overdue' : 'rented';
-      var badge = it.overdue
-        ? '<span class="badge overdue">연체 ' + it.hours + 'h</span>'
-        : '<span class="badge rented">' + it.hours + '시간 경과</span>';
       return '' +
         '<div class="list-item ' + (it.overdue ? 'overdue' : '') + '">' +
-          '<span class="dot ' + cls + '"></span>' +
           '<div class="li-main">' +
-            '<div class="li-title">' + esc(it.umbrellaNumber) + '번 우산 ' + badge + '</div>' +
+            '<div class="li-title">' + esc(it.umbrellaNumber) + '번 우산 · ' + (it.overdue ? '연체 ' : '') + esc(it.hours) + 'h</div>' +
             '<div class="li-sub">' + esc(it.name) + ' · ' + esc(it.studentId) + ' · ' + esc(it.phone) + '</div>' +
             '<div class="li-sub">대여: ' + esc(it.rentTime) + '</div>' +
           '</div>' +
           '<div class="li-actions">' +
-            '<button class="btn btn-danger" onclick="doForceReturn(\'' + esc(it.umbrellaNumber) + '\')">강제 반납</button>' +
+            '<button class="btn-sm danger" onclick="doForceReturn(\'' + esc(it.umbrellaNumber) + '\')">강제반납</button>' +
           '</div>' +
         '</div>';
     }).join('');
@@ -712,9 +1151,7 @@ body.admin-on .admin-entry { display: none; }
   async function doForceReturn(num) {
     if (!confirm(num + '번 우산을 강제 반납 처리할까요?')) return;
     showLoading(true);
-    var res = await api('/admin/force-return', {
-      method: 'POST', admin: true, body: { umbrellaNumber: num }
-    });
+    var res = await api('/admin/force-return', { method: 'POST', admin: true, body: { umbrellaNumber: num } });
     showLoading(false);
     toast(res.message, res.ok ? 'ok' : 'err');
     if (res.ok) loadStatus();
@@ -724,10 +1161,9 @@ body.admin-on .admin-entry { display: none; }
   async function doRegister() {
     var payload = {
       umbrellaNumber: $('newUmbNumber').value.trim(),
-      umbrellaName: $('newUmbName').value.trim()
+      umbrellaName:   $('newUmbName').value.trim(),
     };
     if (!payload.umbrellaNumber) { toast('우산 번호를 입력해주세요.', 'err'); return; }
-
     showLoading(true);
     var res = await api('/admin/register', { method: 'POST', admin: true, body: payload });
     showLoading(false);
@@ -747,22 +1183,19 @@ body.admin-on .admin-entry { display: none; }
 
   function renderUmbList(list) {
     var box = $('umbList');
-    if (!list.length) { box.innerHTML = '<div class="empty">등록된 우산이 없습니다. 위에서 등록해보세요.</div>'; return; }
-
-    var statusText = { available: '대여 가능', rented: '대여 중', overdue: '연체' };
+    if (!list.length) { box.innerHTML = '<div class="empty">등록된 우산이 없습니다.</div>'; return; }
+    var statusText = { available: '가능', rented: '대여중', overdue: '연체' };
     box.innerHTML = list.map(function (it) {
       return '' +
         '<div class="list-item">' +
-          '<span class="dot ' + it.status + '"></span>' +
           '<div class="li-main">' +
-            '<div class="li-title">' + esc(it.umbrellaNumber) + '번 ' +
-              '<span class="badge ' + it.status + '">' + statusText[it.status] + '</span></div>' +
+            '<div class="li-title">' + esc(it.umbrellaNumber) + '번 · ' + statusText[it.status] + '</div>' +
             '<div class="li-sub">' + esc(it.umbrellaName) + ' · 등록 ' + esc(it.regDate) + '</div>' +
           '</div>' +
           '<div class="li-actions">' +
-            '<button class="btn btn-outline" onclick="showQr(\'' + esc(it.umbrellaNumber) + '\',\'' +
+            '<button class="btn-sm" onclick="showQr(\'' + esc(it.umbrellaNumber) + '\',\'' +
               encodeURIComponent(it.qrUrl) + '\',\'' + encodeURIComponent(it.link) + '\')">QR</button>' +
-            '<button class="btn btn-danger" onclick="doDelete(\'' + esc(it.umbrellaNumber) + '\')">삭제</button>' +
+            '<button class="btn-sm danger" onclick="doDelete(\'' + esc(it.umbrellaNumber) + '\')">삭제</button>' +
           '</div>' +
         '</div>';
     }).join('');
@@ -771,21 +1204,18 @@ body.admin-on .admin-entry { display: none; }
   async function doDelete(num) {
     if (!confirm(num + '번 우산을 삭제할까요?')) return;
     showLoading(true);
-    var res = await api('/admin/delete', {
-      method: 'POST', admin: true, body: { umbrellaNumber: num }
-    });
+    var res = await api('/admin/delete', { method: 'POST', admin: true, body: { umbrellaNumber: num } });
     showLoading(false);
     toast(res.message, res.ok ? 'ok' : 'err');
     if (res.ok) loadUmbrellas();
   }
 
-  /* ===================== QR 모달 ===================== */
+  /* ===================== QR ===================== */
   function showQr(num, qrUrlEnc, linkEnc) {
     var qrUrl = decodeURIComponent(qrUrlEnc);
     var link = decodeURIComponent(linkEnc);
     if (!qrUrl) { toast('QR을 만들 수 없습니다.', 'err'); return; }
-
-    $('qrTitle').textContent = num + '번 우산 QR';
+    $('qrTitle').textContent = num + '번 우산';
     $('qrImage').src = qrUrl;
     $('qrLink').textContent = link;
     var dl = $('qrDownload');
@@ -793,10 +1223,9 @@ body.admin-on .admin-entry { display: none; }
     dl.setAttribute('download', 'umbrella-' + num + '-qr.png');
     $('qrModal').classList.add('show');
   }
-
   function closeQr() { $('qrModal').classList.remove('show'); }
 
-  /* ===================== 관리자: 대여 기록 ===================== */
+  /* ===================== 관리자: 기록 ===================== */
   async function loadHistory() {
     showLoading(true);
     var res = await api('/admin/history', { admin: true });
@@ -808,7 +1237,6 @@ body.admin-on .admin-entry { display: none; }
   function renderHistory(list) {
     var body = $('historyBody');
     if (!list.length) { body.innerHTML = '<tr><td colspan="6" class="empty">대여 기록이 없습니다.</td></tr>'; return; }
-
     body.innerHTML = list.map(function (it) {
       var isRented = it.status === '대여중';
       var tag = '<span class="tag ' + (isRented ? 'rented' : 'returned') + '">' + esc(it.status) + '</span>';
@@ -823,43 +1251,58 @@ body.admin-on .admin-entry { display: none; }
     }).join('');
   }
 
-  function handleAuthFail(msg) {
-    toast(msg || '다시 로그인해주세요.', 'err');
-    adminPassword = '';
-    document.body.classList.remove('admin-on');
-    switchTab('scan');
-  }
-
   /* ===================== 이벤트 바인딩 ===================== */
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.tab').forEach(function (btn) {
-      btn.addEventListener('click', function () { switchTab(btn.getAttribute('data-tab')); });
+    // 시작
+    $('startBtn').addEventListener('click', goChoose);
+
+    // 서비스 선택 타일
+    document.querySelectorAll('[data-action]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var action = el.getAttribute('data-action');
+        if (action === 'rent')   goRent();
+        if (action === 'return') goReturn();
+      });
     });
 
-    $('scanBtn').addEventListener('click', doScan);
-    $('scanInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') doScan(); });
+    // 뒤로/처음으로 (data-back)
+    document.querySelectorAll('[data-back]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var target = el.getAttribute('data-back');
+        navigate(target);
+      });
+    });
 
+    // 폼 제출
+    $('rentForm').addEventListener('submit', submitRent);
+    $('returnForm').addEventListener('submit', submitReturn);
+
+    // 관리자 진입
     $('adminEntry').addEventListener('click', showAdminLogin);
-    $('loginCancel').addEventListener('click', function () { switchTab('scan'); });
+    $('loginCancel').addEventListener('click', function(){ navigate('start'); });
     $('loginBtn').addEventListener('click', doLogin);
     $('adminPw').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
     $('logoutBtn1').addEventListener('click', doLogout);
     $('logoutBtn2').addEventListener('click', doLogout);
     $('logoutBtn3').addEventListener('click', doLogout);
 
+    // 관리자 탭 네비
+    document.querySelectorAll('[data-anav]').forEach(function (el) {
+      el.addEventListener('click', function () { navigate(el.getAttribute('data-anav')); });
+    });
+
     $('refreshStatus').addEventListener('click', loadStatus);
     $('refreshManage').addEventListener('click', loadUmbrellas);
     $('refreshHistory').addEventListener('click', loadHistory);
-
     $('registerBtn').addEventListener('click', doRegister);
 
+    // QR
     $('qrClose').addEventListener('click', closeQr);
     $('qrModal').addEventListener('click', function (e) { if (e.target === $('qrModal')) closeQr(); });
 
+    // QR 딥링크: ?umbrella=N → 바로 대여 폼에 prefill
     if (INITIAL_UMBRELLA) {
-      $('scanInput').value = INITIAL_UMBRELLA;
-      switchTab('scan');
-      doScan();
+      goRent(INITIAL_UMBRELLA);
     }
   });
   </script>
