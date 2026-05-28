@@ -50,18 +50,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('status error', err);
-    // DEBUG: 실제 에러 메시지 노출 (확인 후 원복 예정)
-    return res.status(500).json({
-      ok: false,
-      message: '오류가 발생했습니다.',
-      _debug: {
-        name: err && err.name,
-        code: err && err.code,
-        message: err && err.message,
-        hasPostgresUrl: !!process.env.POSTGRES_URL,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        envKeys: Object.keys(process.env).filter(k => /POSTGRES|DATABASE|NEON/i.test(k)),
-      },
-    });
+    return res.status(500).json({ ok: false, message: '오류가 발생했습니다.' });
   }
 }
