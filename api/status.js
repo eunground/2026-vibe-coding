@@ -50,6 +50,17 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('status error', err);
-    return res.status(500).json({ ok: false, message: '오류가 발생했습니다.' });
+    return res.status(500).json({
+      ok: false,
+      message: '오류가 발생했습니다.',
+      _debug: {
+        name: err && err.name,
+        code: err && err.code,
+        message: err && err.message,
+        stack: err && err.stack && err.stack.split('\n').slice(0, 5),
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        dbUrlHead: process.env.DATABASE_URL ? process.env.DATABASE_URL.slice(0, 40) + '...' : null,
+      },
+    });
   }
 }
