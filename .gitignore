@@ -1,2 +1,15 @@
 # Claude Code local/personal settings (per-developer, not shared)
 .claude/settings.local.json
+
+# Node
+node_modules/
+npm-debug.log*
+.pnpm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
