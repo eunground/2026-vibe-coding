@@ -49,7 +49,7 @@ public/
 
 **Static frontend.** `public/index.html` is the single page. No framework, no bundler. Vanilla JS. The `api(path, opts)` helper wraps `fetch()`; admin calls set `opts.admin = true` which adds the `x-admin-password` header. There is no router — Vercel serves `public/index.html` at `/`, and SPA-style navigation is done by toggling `.view` sections via `switchTab` / `showOnlyView`.
 
-**Stateless admin auth.** No sessions. `POST /api/admin/login` only verifies the password from `x-admin-password` header against `process.env.ADMIN_PASSWORD`. On success, the client keeps the password in a `var adminPassword` and passes it as that header on every subsequent admin call. Every admin endpoint re-checks via `requireAdmin(req, res)`; on failure it 401s with `{ok:false, message}`, and the client treats that as auth loss (`handleAuthFail` → back to scan tab).
+**Stateless admin auth.** No sessions. `POST /api/admin/login` only verifies the password from `x-admin-password` header against the `ADMIN_PASSWORD` constant **hardcoded in `lib/auth.js`** (this is intentional — repo is private). On success, the client keeps the password in a `var adminPassword` and passes it as that header on every subsequent admin call. Every admin endpoint re-checks via `requireAdmin(req, res)`; on failure it 401s with `{ok:false, message}`, and the client treats that as auth loss (`handleAuthFail` → back to scan tab). **Do not move the password to an env var without telling the user** — they chose hardcoding for simplicity over the env-var dance.
 
 **Status is derived.** An umbrella's current state (`available`/`rented`/`overdue`) is computed from the `rentals` table — there is no status column on `umbrellas`. "Overdue" means a `status='rented'` row older than `OVERDUE_HOURS` (24h).
 
@@ -69,13 +69,12 @@ INSERT into `rentals` is the rent operation. If two students try to rent the sam
 
 ## Configuration
 
-**Environment variables** (set in Vercel dashboard, Settings → Environment Variables):
-- `ADMIN_PASSWORD` — **required**. The shared admin password.
-- `POSTGRES_URL` and friends — **auto-injected** when you connect Vercel Postgres to the project.
+**Environment variables** (auto-injected by Vercel when you connect Postgres):
+- `POSTGRES_URL` and friends — provisioned via Vercel Storage → Postgres → Connect Project.
 
-**Code-level constants** (`lib/utils.js`):
-- `OVERDUE_HOURS = 24`
-- `TIMEZONE = 'Asia/Seoul'`
+**Code-level constants:**
+- `lib/auth.js` — `ADMIN_PASSWORD` (hardcoded; private repo)
+- `lib/utils.js` — `OVERDUE_HOURS = 24`, `TIMEZONE = 'Asia/Seoul'`
 
 Changes here ship via `git push`.
 

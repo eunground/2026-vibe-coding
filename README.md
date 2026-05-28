@@ -55,22 +55,14 @@ gh repo create umbrella-rental --private --source=. --remote=origin --push
 
 Postgres 콘솔의 **Query** 탭에서 [`db/schema.sql`](db/schema.sql)의 내용을 그대로 실행.
 
-### 5. 관리자 비밀번호 설정
-
-프로젝트의 **Settings → Environment Variables**:
-
-| Name | Value |
-| --- | --- |
-| `ADMIN_PASSWORD` | (원하는 비밀번호) |
-
-> 환경변수 추가 후에는 한 번 **Redeploy** 필요 (Deployments → 최신 배포 우측 ⋯ → Redeploy).
-
-### 6. 끝
+### 5. 끝
 
 발급된 `https://<프로젝트>.vercel.app` URL이 곧 학생용 진입점입니다.
 
 - **학생**: `/` 또는 `/?umbrella=12` (QR 스캔)
-- **관리자**: 푸터의 "관리자 로그인" 클릭 → 위에서 설정한 비밀번호
+- **관리자**: 푸터의 "관리자 로그인" 클릭 → 비밀번호 `admin1234` (또는 `lib/auth.js`의 `ADMIN_PASSWORD` 값)
+
+> ⚠️ 관리자 비밀번호는 `lib/auth.js`에 하드코딩되어 있습니다. **repo가 private 임을 전제로 한 설계**이므로 절대 public 으로 전환하지 마세요. 노출됐다면 즉시 비밀번호 변경 + push.
 
 ## 이후 작업
 
@@ -101,7 +93,7 @@ vercel dev               # http://localhost:3000
 
 | 값 | 위치 | 변경 방법 |
 | --- | --- | --- |
-| 관리자 비밀번호 | `ADMIN_PASSWORD` env var | Vercel 대시보드에서 수정 → Redeploy |
+| 관리자 비밀번호 | `lib/auth.js`의 `ADMIN_PASSWORD` 상수 | 코드 수정 후 `git push` |
 | 연체 기준 시간 | `lib/utils.js`의 `OVERDUE_HOURS` | 코드 수정 후 `git push` |
 | 시간대 | `lib/utils.js`의 `TIMEZONE` | 코드 수정 후 `git push` |
 
