@@ -50,18 +50,29 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('status error', err);
-    const head = (k) => process.env[k] ? process.env[k].slice(0, 80) + '...' : null;
+    const parsed = {};
+    for (const k of ['DATABASE_URL', 'POSTGRES_URL', 'PRISMA_DATABASE_URL']) {
+      const raw = process.env[k];
+      if (!raw) { parsed[k] = null; continue; }
+      try {
+        const u = new URL(raw);
+        parsed[k] = {
+          protocol: u.protocol,
+          host: u.host,
+          pathname: u.pathname,
+          searchParams: Object.fromEntries(u.searchParams),
+          totalLen: raw.length,
+        };
+      } catch (e) {
+        parsed[k] = { parseError: e.message, totalLen: raw.length, head: raw.slice(0, 50) };
+      }
+    }
     return res.status(500).json({
       ok: false,
       message: '오류가 발생했습니다.',
       _debug: {
         errMessage: err && err.message,
-        urls: {
-          DATABASE_URL:        head('DATABASE_URL'),
-          POSTGRES_URL:        head('POSTGRES_URL'),
-          PRISMA_DATABASE_URL: head('PRISMA_DATABASE_URL'),
-        },
-        allRelatedKeys: Object.keys(process.env).filter(k => /POSTGRES|DATABASE|NEON|PG/i.test(k)),
+        urls: parsed,
       },
     });
   }
