@@ -50,30 +50,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('status error', err);
-    const parsed = {};
-    for (const k of ['DATABASE_URL', 'POSTGRES_URL', 'PRISMA_DATABASE_URL']) {
-      const raw = process.env[k];
-      if (!raw) { parsed[k] = null; continue; }
-      try {
-        const u = new URL(raw);
-        parsed[k] = {
-          protocol: u.protocol,
-          host: u.host,
-          pathname: u.pathname,
-          searchParams: Object.fromEntries(u.searchParams),
-          totalLen: raw.length,
-        };
-      } catch (e) {
-        parsed[k] = { parseError: e.message, totalLen: raw.length, head: raw.slice(0, 50) };
-      }
-    }
-    return res.status(500).json({
-      ok: false,
-      message: '오류가 발생했습니다.',
-      _debug: {
-        errMessage: err && err.message,
-        urls: parsed,
-      },
-    });
+    return res.status(500).json({ ok: false, message: '오류가 발생했습니다.' });
   }
 }
